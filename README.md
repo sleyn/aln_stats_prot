@@ -32,7 +32,7 @@ b1346
 ## Output
 
 Script outputs two files:
-* `[OUT_DIR]/[PREFIX]_stat_variant.tsv` - table of amino acid counts for each alignment position. Columns are 1-based alignment positions and rows are one-letter amino acid codes or gaps. Each cell contains count of the corresponding letter in a corresponding position. 
+* `[OUT_DIR]/[PREFIX]_stat_variant.tsv` - table of amino acid counts for each alignment position. Columns are 1-based alignment positions and rows are one-letter amino acid codes or gaps. Each cell contains count of the corresponding letter in a corresponding position. If unusual letters will be observed in the alignment (letters out of amino acid alphabet like 'X' or 'Z') they will be preseved for alignment debugging purpose. 
 * `[OUT_DIR]/[PREFIX]_stat_deletions.tsv` - table of deletion counts. Table has three columns:
   * Start_pos - position of alignment where deletion starts
   * Length - length of the deletion

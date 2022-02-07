@@ -5,9 +5,9 @@ def main():
     from os import path
     import re
 
-    parser = argparse.ArgumentParser(description='Make summary on substitutions in a reference sequence from an alignmnet.')
+    parser = argparse.ArgumentParser(description='Make summary on substitutions and deletions in alignmnet.')
     parser.add_argument('-a', '--aln', action='store', type=str, help='Alignment file in FASTA format.')
-    parser.add_argument('-o', '--out_dir', action='store', type=str, help='Output dir.')
+    parser.add_argument('-o', '--out_dir', action='store', default='.', type=str, help='Output dir.')
     parser.add_argument('-p', '--prefix', action='store', default='', type=str, help='Prefix for output files. Default: no prefix.')
     parser.add_argument('-e', '--exclude_file', action='store', type=str, default='-', help='File with IDs of genes that should be excluded from the analysis. One ID per line.')
     args = parser.parse_args()
@@ -31,10 +31,7 @@ def main():
     alignments_parsed = AlignIO.MultipleSeqAlignment(alignments_parsed)
     alignments_length = len(alignments_parsed[0].seq)
 
-    aa_occurences = pd.DataFrame(
-        0,
-        index=range(alignments_length),
-        columns=[
+    accepted_aa = [
             'G',
             'A',
             'L',
@@ -57,6 +54,11 @@ def main():
             'T',
             '-'
         ]
+
+    aa_occurences = pd.DataFrame(
+        0,
+        index=range(alignments_length),
+        columns=accepted_aa
     )
 
     # Count substitutions
@@ -95,6 +97,9 @@ def main():
     # Output substitutions
     # Change from 0-based to 1-based positions
     aa_occurences.index += 1
+    # In case there will be other letters except accepted letters additional processing of data frame is needed
+    aa_occurences = aa_occurences.fillna(0)
+    aa_occurences = aa_occurences[aa_occurences.columns].astype('int64')
     aa_occurences.transpose().to_csv(path.join(args.out_dir, prefix + 'stat_variant.tsv'), sep='\t')
 
     # Output deletions

@@ -8,15 +8,33 @@ def main():
     parser = argparse.ArgumentParser(description='Make summary on substitutions and deletions in alignmnet.')
     parser.add_argument('-a', '--aln', action='store', type=str, help='Alignment file in FASTA format.')
     parser.add_argument('-o', '--out_dir', action='store', default='.', type=str, help='Output dir.')
-    parser.add_argument('-p', '--prefix', action='store', default='', type=str, help='Prefix for output files. Default: no prefix.')
-    parser.add_argument('-e', '--exclude_file', action='store', type=str, default='-', help='File with IDs of genes that should be excluded from the analysis. One ID per line.')
+    parser.add_argument('-p', '--prefix', action='store', default='', type=str,
+                        help='Prefix for output files. Default: no prefix.')
+    parser.add_argument('-r', '--reference', action='store', default='', type=str,
+                        help='ID of the reference protein. If set all variants will be attributed to the positions '
+                             'in the reference protein.')
+    parser.add_argument('-e', '--exclude_file', action='store', type=str, default='-',
+                        help='File with IDs of genes that should be excluded from the analysis. One ID per line. '
+                             'Works only if "--include_file" is not set.')
+    parser.add_argument('-i', '--include_file', action='store', type=str, default='-',
+                        help='File with IDs of genes that should be kept from the analysis. One ID per line. '
+                             'Overrides "--exclude_file" option.')
     args = parser.parse_args()
 
-    # Read IDs that need to be excluded
+    # Read IDs that need to be excluded and included
     exclude_id = []
-    if args.exclude_file != '-':
+    include_id = []
+    # Flag if include file is set
+    set_include = False
+
+    if args.include_file != '-':
+        set_include = True
+        with open(args.include_file) as include_file:
+            include_id = [line.strip() for line in include_file]
+    elif args.exclude_file != '-':
         with open(args.exclude_file) as exclude_file:
             exclude_id = [line.strip() for line in exclude_file]
+
 
     # Open alignment file
     alignments = AlignIO.parse(args.aln, 'fasta')
@@ -25,7 +43,10 @@ def main():
     # Exclude specified IDs
     for aln in alignments:
         for record in aln:
-            if record.id not in exclude_id:
+            if set_include:
+                if record.id in include_id:
+                    alignments_parsed.append(record)
+            elif record.id not in exclude_id:
                 alignments_parsed.append(record)
 
     alignments_parsed = AlignIO.MultipleSeqAlignment(alignments_parsed)
@@ -89,7 +110,7 @@ def main():
                 if deletions.setdefault(del_event, 1) > 1:
                     deletions[del_event] += 1
 
-    print('Write otput')
+    print('Write output')
     prefix = ''
     if args.prefix != '':
         prefix = args.prefix + '_'

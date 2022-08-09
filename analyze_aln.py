@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 def main():
     from Bio import AlignIO
     import pandas as pd
@@ -5,7 +7,7 @@ def main():
     import os
     import re
 
-    parser = argparse.ArgumentParser(description='Make summary on substitutions and deletions in alignmnet.')
+    parser = argparse.ArgumentParser(description='Make summary on substitutions and deletions in alignment.')
     parser.add_argument('-a', '--aln', action='store', type=str, help='Alignment file in FASTA format.')
     parser.add_argument('-o', '--out_dir', action='store', default='.', type=str, help='Output dir.')
     parser.add_argument('-p', '--prefix', action='store', default='', type=str,
@@ -63,7 +65,7 @@ def main():
             elif record.id not in exclude_id:
                 alignments_parsed.append(record)
 
-    # Check if reference protein is found in the alignmnet
+    # Check if reference protein is found in the alignment
     if ref_check != bool(args.reference):
         print('Reference is set but not found.')
         exit(1)
